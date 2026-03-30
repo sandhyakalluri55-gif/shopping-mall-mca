@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(to right, #1e293b, #3b82f6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 320px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <h2>Create Account</h2>
+
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <input type="password" id="confirm" placeholder="Confirm Password">
+        <input type="number" id="age" placeholder="Age">
+
+        <select id="gender">
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+
+        <button onclick="register()">Register</button>
+
+        <div class="login-link">
+            Already have account?
+            <a href="login.html">Login</a>
+        </div>
+
+    </div>
+
+    <script>
+    function register() {
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
+        let password = document.getElementById("password").value;
+        let confirm = document.getElementById("confirm").value;
+        let age = document.getElementById("age").value;
+        let gender = document.getElementById("gender").value;
+
+        if (!name || !email || !password || !confirm || !age) {
+            alert("Fill necessary fields ❌");
+            return;
+        }
+
+        if (password !== confirm) {
+            alert("Passwords do not match ❌");
+            return;
+        }
+
+        fetch("http://localhost:3000/api/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password,
+                age: Number(age),
+                gender: gender
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem("user_id", data.user_id);
+                localStorage.setItem("user_name", name);
+                alert("Registered Successfully ✅");
+                window.location.href = "login.html";
+            } else if (data.isExisting) {
+                // Auto-login and redirect
+                localStorage.setItem("user_id", data.user_id);
+                localStorage.setItem("user_name", name);
+                alert("Email already registered. Auto-logging in and redirecting...");
+                window.location.href = "login.html";
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("API connection failed! Ensure node server.js is running.");
+        });
+    }
+    </script>
+
+</body>
+
+</html>

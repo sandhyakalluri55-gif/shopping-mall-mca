@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Insights Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #0f172a;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #1e293b;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .box h3 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        .insights {
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 1200px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .insights h3 {
+            color: #0f172a;
+            margin-top: 0;
+        }
+
+        .insight-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>👥 Customer Insights</h1>
+        <p>Deep Dive into Customer Behavior & Trends</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="goBack()">⬅ Back</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number" id="totalCustomers">0</div>
+            <div class="stat-label">Total Customers</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="newCustomersCount">0</div>
+            <div class="stat-label">New Customers</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="returningCustomersCount">0</div>
+            <div class="stat-label">Returning Customers</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="avgOrderValue">₹0</div>
+            <div class="stat-label">Average Order Value</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="box">
+            <h3>🏆 Top Customers</h3>
+            <canvas id="topChart"></canvas>
+        </div>
+
+        <div class="box">
+            <h3>👥 New vs Returning Customers</h3>
+            <canvas id="newReturningChart"></canvas>
+        </div>
+
+        <div class="box">
+            <h3>💰 Customer Spending Range</h3>
+            <canvas id="spendingChart"></canvas>
+        </div>
+
+        <div class="box">
+            <h3>📊 Orders per Customer</h3>
+            <canvas id="ordersChart"></canvas>
+        </div>
+    </div>
+
+    <div class="insights">
+        <h3>📌 Key Insights</h3>
+        <div id="insightText">Loading insights...</div>
+    </div>
+
+    <script>
+        let topChart, newReturningChart, spendingChart, ordersChart;
+
+        function goBack() {
+            window.location.href = "menu.html";
+        }
+
+        async function loadDashboard() {
+            try {
+                const res = await fetch("http://localhost:3000/api/customer-insights");
+                const data = await res.json();
+
+                console.log("Customer Insights Data:", data);
+
+                // Update statistics
+                document.getElementById("totalCustomers").textContent = data.totalCustomers;
+                document.getElementById("newCustomersCount").textContent = data.newCustomers;
+                document.getElementById("returningCustomersCount").textContent = data.returningCustomers;
+                document.getElementById("avgOrderValue").textContent = `₹${data.averageOrderValue}`;
+
+                // Destroy old charts
+                if (topChart) topChart.destroy();
+                if (newReturningChart) newReturningChart.destroy();
+                if (spendingChart) spendingChart.destroy();
+                if (ordersChart) ordersChart.destroy();
+
+                // 1️⃣ Top Customers Horizontal Bar
+                topChart = new Chart(document.getElementById("topChart"), {
+                    type: 'bar',
+                    data: {
+                        labels: data.topNames.length > 0 ? data.topNames : ["No Data"],
+                        datasets: [{
+                            data: data.topValues.length > 0 ? data.topValues : [0],
+                            backgroundColor: "#4F46E5",
+                            borderColor: "#4338CA",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                // 2️⃣ New vs Returning Doughnut
+                newReturningChart = new Chart(document.getElementById("newReturningChart"), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ["New Customers", "Returning Customers"],
+                        datasets: [{
+                            data: [data.newCustomers, data.returningCustomers],
+                            backgroundColor: ["#34D399", "#FBBF24"],
+                            borderColor: ["#10B981", "#F59E0B"],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+
+                // 3️⃣ Customer Spending Range
+                spendingChart = new Chart(document.getElementById("spendingChart"), {
+                    type: 'bar',
+                    data: {
+                        labels: ["Low (0-500)", "Medium (500-2000)", "High (>2000)"],
+                        datasets: [{
+                            data: data.spendingRange,
+                            backgroundColor: ["#FCA5A5", "#A5B4FC", "#6EE7B7"],
+                            borderColor: ["#EF4444", "#4F46E5", "#10B981"],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                // 4️⃣ Orders per Customer
+                ordersChart = new Chart(document.getElementById("ordersChart"), {
+                    type: 'line',
+                    data: {
+                        labels: data.topNames,
+                        datasets: [{
+                            label: "Orders",
+                            data: data.topValues,
+                            borderColor: "#8B5CF6",
+                            backgroundColor: "rgba(139, 92, 246, 0.2)",
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: "#8B5CF6"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true }
+                        }
+                    }
+                });
+
+                // Insights
+                const topCustomer = data.topNames[0] || "N/A";
+                const conversionRate = ((data.returningCustomers / data.totalCustomers * 100) || 0).toFixed(1);
+
+                document.getElementById("insightText").innerHTML = `
+            <div class="insight-item">
+                <strong>🥇 Top Customer:</strong> ${topCustomer} with ${data.topValues[0] || 0} purchases
+            </div>
+            <div class="insight-item">
+                <strong>📈 Customer Retention Rate:</strong> ${conversionRate}% (${data.returningCustomers} returning customers)
+            </div>
+            <div class="insight-item">
+                <strong>💡 Premium Customers:</strong> ${data.spendingRange[2]} customers spending above ₹2000
+            </div>
+            <div class="insight-item">
+                <strong>🎯 High-Value Segment:</strong> Focus on ${data.spendingRange[1]} medium-spending customers for upsell opportunities
+            </div>
+            <div class="insight-item">
+                <strong>💰 Total Revenue from Customers:</strong> ₹${(data.averageOrderValue * data.totalCustomers).toFixed(0)}
+            </div>
+        `;
+
+            } catch (error) {
+                console.error("Error loading dashboard:", error);
+                document.getElementById("insightText").innerHTML = "<p style='color: red;'>Error loading data. Please try again later.</p>";
+            }
+        }
+
+        window.addEventListener('load', loadDashboard);
+        setInterval(loadDashboard, 10000);
+    </script>
+
+</body>
+
+</html>

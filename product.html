@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Product Categories</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f8fafc;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .back-btn {
+            margin: 15px;
+            padding: 10px 15px;
+            background: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .filters {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .filters button {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            background: #0f172a;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            color: #0f172a;
+        }
+
+        .rating {
+            color: gold;
+            font-size: 16px;
+            margin: 8px 0;
+        }
+
+        .price {
+            font-weight: bold;
+            font-size: 18px;
+            color: #22c55e;
+            margin: 10px 0;
+        }
+
+        .card button {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .card button:hover {
+            background: linear-gradient(to right, #16a34a, #15803d);
+            transform: scale(1.05);
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .popup::before {
+            content: "✅ ";
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Product Categories</h1>
+    </div>
+
+    <button onclick="goBack()" class="back-btn">⬅ Back</button>
+    <button onclick="viewOrders()" class="back-btn">📦 My Orders</button>
+
+    <div class="filters">
+        <button onclick="filterProducts('all')">All</button>
+        <button onclick="filterProducts('men')">Men</button>
+        <button onclick="filterProducts('women')">Women</button>
+    </div>
+
+    <div class="grid" id="productGrid"></div>
+
+    <div id="popup" class="popup">Order Placed Successfully ✅</div>
+
+    <script>
+        // ✅ PRICE FIX (NUMBER FORMAT)
+        const products = [
+            { name: "T-Shirt", category: "men", image: "images/men.webp", rating: "⭐⭐⭐⭐☆", price: 499 },
+            { name: "Shirt", category: "men", image: "images/shirt.avif", rating: "⭐⭐⭐⭐⭐", price: 799 },
+            { name: "Jeans", category: "men", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400", rating: "⭐⭐⭐☆☆", price: 1200 },
+            { name: "Men Jackets", category: "men", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400", rating: "⭐⭐⭐⭐☆", price: 2500 },
+            { name: "Dress", category: "women", image: "images/kurthi.jpg", rating: "⭐⭐⭐⭐⭐", price: 999 },
+            { name: "Saree", category: "women", image: "images/saree.jpg", rating: "⭐⭐⭐⭐☆", price: 1500 },
+            { name: "Kurti", category: "women", image: "images/blue.jpg", rating: "⭐⭐⭐☆☆", price: 599 },
+            { name: "Leggings", category: "women", image: "images/red.webp", rating: "⭐⭐⭐⭐☆", price: 499 },
+            { name: "Top", category: "women", image: "images/brown.jpg", rating: "⭐⭐⭐☆☆", price: 399 },
+            { name: "Blouses", category: "women", image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=400", rating: "⭐⭐⭐⭐⭐", price: 799 },
+        ];
+
+        const productGrid = document.getElementById("productGrid");
+
+        function displayProducts() {
+            productGrid.innerHTML = "";
+            products.forEach(product => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.setAttribute("data-category", product.category);
+
+                // ✅ PRICE PASS FIX
+                card.innerHTML = `
+                    <img src="${product.image}" onclick="orderNow('${product.name}', '${product.image}', ${product.price})">
+                    <h3>${product.name}</h3>
+                    <div class="rating">${product.rating}</div>
+                    <div class="price">₹${product.price}</div>
+                    <button onclick="orderNow('${product.name}', '${product.image}', ${product.price})">Buy Now</button>
+                `;
+                productGrid.appendChild(card);
+            });
+        }
+
+        displayProducts();
+
+        function goBack() {
+            window.location.href = "menu.html";
+        }
+
+        function viewOrders() {
+            window.location.href = "order.html";
+        }
+
+        // ✅ UPDATED FUNCTION
+        function orderNow(productName, productImage, price) {
+
+            const user_id = localStorage.getItem("user_id");
+
+            if (!user_id) {
+                alert("Login first ❌");
+                window.location.href = "login.html";
+                return;
+            }
+
+            fetch("http://127.0.0.1:3000/api/buy", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: user_id,
+                    user_name: localStorage.getItem("user_name") || "Customer",
+                    product_name: productName,
+                    product_image: productImage,
+                    price: price,
+                    status: "Pending",
+                    mode: "online"
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const popup = document.getElementById("popup");
+                        // User requirement: Exact string "Order Placed Successfully ✅"
+                        // Note: CSS already adds ✅ in before pseudo-element, but requirement asks for exact text.
+                        popup.textContent = "Order Placed Successfully ✅";
+                        popup.style.display = "block";
+                        setTimeout(() => popup.style.display = "none", 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error placing order");
+                });
+        }
+
+        function filterProducts(category) {
+            const cards = document.querySelectorAll(".card");
+            cards.forEach(card => {
+                if (category === "all" || card.getAttribute("data-category") === category) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

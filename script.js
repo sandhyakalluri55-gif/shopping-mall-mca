@@ -1,0 +1,312 @@
+body {
+    margin: 0;
+    font - family: 'Segoe UI', sans - serif;
+}
+
+.home {
+    height: 100vh;
+    /* full screen */
+    width: 100 %;
+    background: url("https://images.unsplash.com/photo-1483985988355-763728e1935b") no - repeat center;
+    background - size: cover;
+    position: relative;
+}
+
+/* overlay */
+.overlay {
+    position: absolute;
+    width: 100 %;
+    height: 100 %;
+    background: linear - gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+
+    display: flex;
+    flex - direction: column;
+    justify - content: center;
+    padding - left: 80px;
+    color: white;
+}
+
+.overlay h1 {
+    font - size: 48px;
+    max - width: 600px;
+}
+
+.overlay p {
+    margin: 20px 0;
+    font - size: 18px;
+}
+
+button {
+    width: 180px;
+    padding: 14px;
+    border - radius: 30px;
+    border: none;
+    background: linear - gradient(to right, #ff4ecd, #6a5cff);
+    color: white;
+    font - size: 18px;
+    cursor: pointer;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100 %;
+    height: 100 %;
+
+    background: linear - gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+
+    display: flex;
+    flex - direction: column;
+    justify - content: center;
+    padding - left: 60px;
+    box - sizing: border - box;
+    /* 🔥 important */
+}
+
+/* LOGIN BACKGROUND */
+.login {
+    height: 100vh;
+    background: url("https://images.unsplash.com/photo-1483985988355-763728e1935b") no - repeat center;
+    background - size: cover;
+
+    display: flex;
+    justify - content: center;
+    align - items: center;
+}
+
+/* GLASS EFFECT LOGIN BOX 🔥 */
+.login - box {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop - filter: blur(10px);
+    padding: 40px;
+    border - radius: 20px;
+    text - align: center;
+    width: 320px;
+    color: white;
+}
+
+/* INPUT */
+.login - box input {
+    width: 100 %;
+    padding: 12px;
+    margin: 12px 0;
+    border - radius: 10px;
+    border: none;
+    outline: none;
+}
+
+/* FORGOT */
+.forgot {
+    font - size: 13px;
+    text - align: right;
+    cursor: pointer;
+    color: #ddd;
+}
+
+/* BUTTON */
+button {
+    width: 100 %;
+    padding: 12px;
+    border - radius: 25px;
+    border: none;
+    background: linear - gradient(to right, #ff4ecd, #6a5cff);
+    color: white;
+    font - size: 16px;
+    cursor: pointer;
+}
+
+/* SIGNUP */
+.signup {
+    margin - top: 15px;
+    font - size: 13px;
+}
+
+/* switch text */
+.switch {
+    margin- top: 15px;
+font - size: 13px;
+}
+
+.switch span {
+    color: yellow;
+cursor: pointer;
+font - weight: bold;
+}
+
+/* TITLE */
+.title {
+    text - align: center;
+    margin - top: 20px;
+    font - size: 32px;
+}
+
+//* BACKGROUND IMAGE 🔥 */
+body {
+    margin: 0;
+    font - family: 'Segoe UI', sans - serif;
+
+    background: url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a") no - repeat center;
+    background - size: cover;
+}
+
+/* DARK OVERLAY */
+.menu - container {
+    text - align: center;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    min - height: 100vh;
+    color: white;
+}
+
+/* TITLE */
+.menu - container h1 {
+    font - size: 40px;
+}
+
+.menu - container p {
+    margin - bottom: 30px;
+}
+
+/* GRID */
+.menu - grid {
+    display: grid;
+    grid - template - columns: repeat(3, 1fr);
+    gap: 25px;
+    padding: 20px;
+}
+
+/* CARD (GLASS EFFECT 🔥) */
+.card {
+    padding: 40px;
+    border - radius: 20px;
+    cursor: pointer;
+    transition: 0.4s;
+
+    background: rgba(255, 255, 255, 0.15);
+    backdrop - filter: blur(10px);
+}
+
+/* ICON */
+.card h2 {
+    font - size: 40px;
+}
+
+/* HOVER */
+.card:hover {
+    transform: scale(1.08);
+    background: white;
+    color: black;
+}
+ /* 🔥 CLEAN LIGHT BACKGROUND (NO DARK IMAGE) */
+.menu - bg {
+    background: #f5f7fb;   /* light premium color */
+}
+
+/* CONTAINER */
+.menu - overlay {
+    min - height: 100vh;
+    padding: 40px;
+    text - align: center;
+    color: #333;
+}
+
+/* TITLE */
+.menu - overlay h1 {
+    font - size: 36px;
+}
+
+.menu - overlay p {
+    margin - bottom: 30px;
+}
+
+/* GRID */
+.menu - grid {
+    display: grid;
+    grid - template - columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+/* CARD */
+.menu - card {
+    background: white;
+    border - radius: 20px;
+    padding: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+    box - shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ICON IMAGE */
+.menu - card img {
+    width: 80px;
+    margin - bottom: 10px;
+}
+
+/* TEXT */
+.menu - card h3 {
+    margin - top: 10px;
+}
+
+/* HOVER EFFECT 🔥 */
+.menu - card:hover {
+    transform: translateY(-8px);
+    box - shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+.menu - bg {
+    background: url("https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1600") no - repeat center;
+    background - size: cover;
+}
+.menu - card img {
+    width: 100 %;
+    height: 180px;
+    object - fit: cover;  /* 🔥 important */
+    border - top - left - radius: 20px;
+    border - top - right - radius: 20px;
+}
+button {
+    width: auto;              /* 🔥 important (remove full width) */
+    padding: 10px 25px;       /* small size */
+    border - radius: 25px;
+    border: none;
+    background: linear - gradient(to right, #ff4ecd, #6a5cff);
+    color: white;
+    font - size: 14px;          /* small text */
+    cursor: pointer;
+}
+.back - btn {
+    margin: 15px;
+    padding: 10px 15px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    border - radius: 8px;
+    cursor: pointer;
+}
+
+.back - btn:hover {
+    background: #1e293b;
+}
+.graphs {
+    display: grid;
+    grid - template - columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.box {
+    background: white;
+    padding: 20px;
+    border - radius: 12px;
+    height: 300px;
+}
+
+canvas {
+    height: 250px!important;
+}
+.insights {
+    margin: 20px;
+    background: white;
+    padding: 20px;
+    border - radius: 12px;
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Feedback</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f8fafc;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .feedback-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .back-btn {
+            margin: 15px;
+            padding: 10px 15px;
+            background: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Customer Feedback</h1>
+    </div>
+
+    <button onclick="goBack()" class="back-btn">⬅ Back</button>
+
+    <div class="container">
+
+        <!-- FORM -->
+        <div class="box">
+            <h3>Give Your Feedback</h3>
+
+            <input type="text" id="name" placeholder="Enter product name">
+
+            <select id="rating">
+                <option value="">Select Rating</option>
+                <option value="1">⭐ 1</option>
+                <option value="2">⭐ 2</option>
+                <option value="3">⭐ 3</option>
+                <option value="4">⭐ 4</option>
+                <option value="5">⭐ 5</option>
+            </select>
+
+            <select id="gender">
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <textarea id="comment" placeholder="Write your feedback"></textarea>
+
+            <button onclick="addFeedback()">Submit</button>
+
+        </div>
+
+        <!-- DISPLAY -->
+        <div class="box">
+            <h3>Customer Reviews</h3>
+            <div id="feedbackList"></div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD...REAL",
+            authDomain: "my-shop-project-995b2.firebaseapp.com",
+            projectId: "my-shop-project-995b2",
+            storageBucket: "my-shop-project-995b2.appspot.com",
+            messagingSenderId: "328902026156",
+            appId: "1:328902026156:web:8017c4d59c0458829bd009"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function goBack() {
+            window.location.href = "menu.html";
+        }
+
+        // 🔥 ADD FEEDBACK (FIXED)
+        function addFeedback() {
+            let name = document.getElementById("name").value;
+            let rating = document.getElementById("rating").value;
+            let gender = document.getElementById("gender").value;
+            let comment = document.getElementById("comment").value;
+
+            if (name === "" || rating === "" || gender === "") {
+                alert("Please fill required fields");
+                return;
+            }
+
+            db.collection("feedback").add({
+                name: name,
+                rating: Number(rating),   // 🔥 IMPORTANT
+                gender: gender,
+                comment: comment,
+                time: new Date()
+            })
+                .then(() => {
+                    alert("Saved ✅");
+
+                    document.getElementById("name").value = "";
+                    document.getElementById("rating").value = "";
+                    document.getElementById("gender").value = "";
+                    document.getElementById("comment").value = "";
+                });
+        }
+
+        // 🔥 REAL-TIME LOAD (AUTO UPDATE)
+        db.collection("feedback")
+            .orderBy("time", "desc")
+            .onSnapshot((data) => {
+
+                document.getElementById("feedbackList").innerHTML = "";
+
+                data.forEach((doc) => {
+                    let f = doc.data();
+
+                    let div = document.createElement("div");
+                    div.classList.add("feedback-item");
+
+                    div.innerHTML = `
+      <strong>${f.name}</strong><br>
+      Rating: ${f.rating} ⭐<br>
+      Gender: ${f.gender}<br>
+      <p>${f.comment || ""}</p>
+      <button onclick="deleteFeedback('${doc.id}')">Delete</button>
+    `;
+
+                    document.getElementById("feedbackList").appendChild(div);
+                });
+
+            });
+
+        // DELETE
+        function deleteFeedback(id) {
+            db.collection("feedback").doc(id).delete();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-back {
+            background: #0f172a;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #1e293b;
+        }
+
+        .btn-filter {
+            background: white;
+            color: #0f172a;
+            border: 2px solid #0f172a;
+        }
+
+        .btn-filter:hover {
+            background: #f0f2f5;
+        }
+
+        .btn-filter.active {
+            background: #0f172a;
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .no-orders {
+            text-align: center;
+            background: white;
+            padding: 60px 20px;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        .no-orders h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .order-card {
+            background: white;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .order-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .order-date {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .order-content {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #e0e0e0;
+        }
+
+        .product-details {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .product-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #0f172a;
+            font-size: 16px;
+        }
+
+        .price {
+            color: #22c55e;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .delivery-info {
+            background: #f0f9ff;
+            padding: 12px;
+            border-left: 4px solid #3b82f6;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .delivery-info strong {
+            color: #1e40af;
+        }
+
+        .order-actions {
+            padding: 15px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-track {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-track:hover {
+            background: #2563eb;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #dc2626;
+        }
+
+        .btn-cancel:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .order-content {
+                flex-direction: column;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .product-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>📦 My Orders</h1>
+        <p>Track and manage your orders</p>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <button class="btn btn-back" onclick="goBack()">⬅ Back to Shop</button>
+            <button class="btn btn-filter active" id="filterAll" onclick="filterOrders('all')">All Orders</button>
+            <button class="btn btn-filter" id="filterPending" onclick="filterOrders('Pending')">Pending</button>
+            <button class="btn btn-filter" id="filterDelivered" onclick="filterOrders('Delivered')">Delivered</button>
+            <button class="btn btn-filter" id="filterCancelled" onclick="filterOrders('Cancelled')">Cancelled</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="totalOrders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="totalSpent">₹0</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">Pending Orders</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="deliveredCount">0</div>
+                <div class="stat-label">Delivered</div>
+            </div>
+        </div>
+
+        <div id="ordersContainer">
+            <div class="no-orders">
+                <h3>📭 Loading orders...</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allOrders = [];
+        let currentFilter = 'all';
+
+        window.addEventListener('load', loadOrders);
+
+        function goBack() {
+            window.location.href = "product.html";
+        }
+
+        function loadOrders() {
+            const user_id = localStorage.getItem("user_id");
+
+            if (!user_id) {
+                document.getElementById("ordersContainer").innerHTML = `
+                    <div class="no-orders">
+                        <h3>🔐 Please Login First</h3>
+                        <p>You need to be logged in to view your orders</p>
+                        <br>
+                        <button class="btn btn-back" onclick="window.location.href='login.html'">Go to Login</button>
+                    </div>
+                `;
+                return;
+            }
+
+            fetch(`http://127.0.0.1:3000/api/orders/${user_id}`)
+                .then(res => res.json())
+                .then(data => {
+                    allOrders = data;
+                    updateStats();
+                    displayOrders(allOrders);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("ordersContainer").innerHTML = `
+                        <div class="no-orders">
+                            <h3>❌ Error loading orders</h3>
+                            <p>There was an issue connecting to the server. Please try again later.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function updateStats() {
+            const totalOrders = allOrders.length;
+            const totalSpent = allOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+            const pendingCount = allOrders.filter(o => o.status === 'Pending').length;
+            const deliveredCount = allOrders.filter(o => o.status === 'Delivered').length;
+
+            document.getElementById("totalOrders").textContent = totalOrders;
+            document.getElementById("totalSpent").textContent = `₹${totalSpent.toLocaleString()}`;
+            document.getElementById("pendingCount").textContent = pendingCount;
+            document.getElementById("deliveredCount").textContent = deliveredCount;
+        }
+
+        function filterOrders(status) {
+            currentFilter = status;
+
+            document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+            if (status === 'all') {
+                document.getElementById('filterAll').classList.add('active');
+            } else if (status === 'Pending') {
+                document.getElementById('filterPending').classList.add('active');
+            } else if (status === 'Delivered') {
+                document.getElementById('filterDelivered').classList.add('active');
+            } else {
+                document.getElementById('filterCancelled').classList.add('active');
+            }
+
+            if (status === 'all') {
+                displayOrders(allOrders);
+            } else {
+                displayOrders(allOrders.filter(o => o.status === status));
+            }
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById("ordersContainer");
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="no-orders">
+                        <h3>📭 No ${currentFilter !== 'all' ? currentFilter.toLowerCase() : ''} orders found</h3>
+                        <p>Start shopping to create your first order!</p>
+                        <br>
+                        <button class="btn btn-back" onclick="window.location.href='product.html'">Continue Shopping</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #${order.id}</div>
+                            <div class="order-date">${new Date(order.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                        <div class="order-status status-${order.status.toLowerCase()}">${order.status}</div>
+                    </div>
+
+                    <div class="order-content">
+                        <img src="${order.product_image || 'https://via.placeholder.com/120'}" alt="${order.product_name}" class="product-image" onerror="this.src='https://via.placeholder.com/120'">
+                        
+                        <div class="product-details">
+                            <div class="product-name">${order.product_name}</div>
+                            
+                            <div class="product-info">
+                                <div class="info-box">
+                                    <div class="info-label">Price</div>
+                                    <div class="info-value price">₹${order.price?.toLocaleString() || '0'}</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Order Type</div>
+                                    <div class="info-value">${order.mode === 'online' ? '🌐 Online' : '🏪 Offline'}</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Quantity</div>
+                                    <div class="info-value">1</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">${order.status}</div>
+                                </div>
+                            </div>
+
+                            <div class="delivery-info">
+                                <strong>📍 Delivery:</strong><br>
+                                <small>Standard Delivery: 3-5 Business Days</small><br>
+                                <small>Free shipping on orders above ₹300</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-actions">
+                        <button class="action-btn btn-track" onclick="trackOrder(${order.id})">📦 Track Order</button>
+                        ${order.status !== 'Cancelled' && order.status !== 'Delivered' ? `
+                            <button class="action-btn btn-cancel" onclick="cancelOrder(${order.id})">❌ Cancel Order</button>
+                        ` : `
+                            <button class="action-btn btn-cancel" disabled>Order ${order.status}</button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function trackOrder(orderId) {
+            alert(`📍 Tracking Order #${orderId}\n\nYour order is on its way!\n\nEstimated Delivery: 3-5 Business Days\n\nYou will receive tracking updates via email.`);
+        }
+
+        function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                return;
+            }
+
+            fetch(`http://127.0.0.1:3000/api/cancel/${orderId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("✅ Order cancelled successfully");
+                        loadOrders();
+                    } else {
+                        alert("❌ Error cancelling order");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("❌ Error cancelling order");
+                });
+        }
+
+        setInterval(loadOrders, 10000);
+    </script>
+
+</body>
+
+</html>
