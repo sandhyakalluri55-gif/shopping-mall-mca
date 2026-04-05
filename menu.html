@@ -48,12 +48,168 @@
         h1 {
             margin-bottom: 10px;
         }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            border-left: 5px solid #ff4ecd;
+            /* match e-commerce generic vivid border */
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        /* Bell Notification Styles */
+        .notif-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 120px;
+            z-index: 1002;
+        }
+
+        .notif-bell {
+            font-size: 22px;
+            cursor: pointer;
+            position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 14px;
+            border-radius: 50%;
+            transition: 0.3s;
+            user-select: none;
+            display: inline-block;
+        }
+
+        .notif-bell:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ff4ecd;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 50%;
+            padding: 3px 6px;
+            display: none;
+        }
+
+        .notif-panel {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 320px;
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .notif-panel.active {
+            display: flex;
+        }
+
+        .notif-header {
+            padding: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .notif-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .notif-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+
+        .notif-item:hover {
+            background: #f5f7fb;
+        }
+
+        .notif-item-icon {
+            font-size: 20px;
+        }
+
+        .notif-item-text {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+        }
+
+        .notif-item-time {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .notif-empty {
+            padding: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
     </style>
 </head>
 
 <body class="menu-bg">
 
     <div class="menu-overlay">
+
+        <!-- ✅ Notification Bell & Panel -->
+        <div class="notif-wrapper">
+            <div class="notif-bell" onclick="toggleNotifPanel()">
+                🔔
+                <span class="notif-badge" id="notif-badge">0</span>
+            </div>
+            <div class="notif-panel" id="notif-panel">
+                <div class="notif-header">Notifications</div>
+                <ul class="notif-list" id="notif-list">
+                    <li class="notif-empty" id="notif-empty">No new notifications</li>
+                </ul>
+            </div>
+        </div>
 
         <!-- ✅ Logout Button -->
         <button onclick="logout()"
@@ -91,6 +247,16 @@
                 <h3>Feedback</h3>
             </div>
 
+            <div class="menu-card" onclick="openPage('dashboard-one.html')">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800">
+                <h3>Dashboard One</h3>
+            </div>
+
+            <div class="menu-card" onclick="openPage('dashboard-two.html')">
+                <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?q=80&w=800">
+                <h3>Dashboard Two</h3>
+            </div>
+
         </div>
 
     </div>
@@ -106,7 +272,97 @@
             alert("Logged out successfully!");
             window.location.href = "login.html";
         }
+
+        /* Real-Time Notifications Logic */
+        const notifications = [
+            { icon: "🛍️", text: "New arrivals are now available!" },
+            { icon: "🔥", text: "Special offers are live!" },
+            { icon: "💸", text: "Limited-time discounts – Shop now!" },
+            { icon: "📦", text: "Your order has been placed successfully!" },
+            { icon: "🚚", text: "Order shipped – arriving soon!" }
+        ];
+
+        let unreadCount = 0;
+
+        function toggleNotifPanel() {
+            const panel = document.getElementById("notif-panel");
+            const badge = document.getElementById("notif-badge");
+
+            panel.classList.toggle("active");
+
+            if (panel.classList.contains("active")) {
+                unreadCount = 0;
+                badge.style.display = "none";
+                badge.innerText = "0";
+            }
+        }
+
+        function addNotificationToPanel(notif) {
+            const emptyMsg = document.getElementById("notif-empty");
+            if (emptyMsg) emptyMsg.style.display = "none";
+
+            const panelList = document.getElementById("notif-list");
+            const li = document.createElement("li");
+            li.className = "notif-item";
+            li.innerHTML = `
+                <div class="notif-item-icon">${notif.icon}</div>
+                <div>
+                    <div class="notif-item-text">${notif.text}</div>
+                    <div class="notif-item-time">Just now</div>
+                </div>
+            `;
+            // insert at top
+            panelList.insertBefore(li, panelList.firstChild);
+
+            const panel = document.getElementById("notif-panel");
+            if (!panel.classList.contains("active")) {
+                const badge = document.getElementById("notif-badge");
+                unreadCount++;
+                badge.style.display = "block";
+                badge.innerText = unreadCount;
+            }
+        }
+
+        function showNotification() {
+            const container = document.getElementById("toast-container");
+            const randomNotif = notifications[Math.floor(Math.random() * notifications.length)];
+
+            // Add to dropdown history
+            addNotificationToPanel(randomNotif);
+
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            toast.innerHTML = `<span class="toast-icon">${randomNotif.icon}</span> <span>${randomNotif.text}</span>`;
+
+            container.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => toast.classList.add("show"), 100);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+
+        window.onload = function () {
+            // Check if user is logged in
+            if (localStorage.getItem("loggedIn") === "true") {
+                showNotification(); // Show one immediately on login/page load
+            } else {
+                setTimeout(showNotification, 1500); // Slight delay if local testing
+            }
+
+            // Show subsequent notifications every 10 to 20 seconds to simulate real-time e-commerce updates
+            setInterval(() => {
+                showNotification();
+            }, Math.floor(Math.random() * 10000) + 10000);
+        }
     </script>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
 
 </body>
 

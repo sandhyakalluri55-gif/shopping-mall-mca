@@ -83,31 +83,15 @@
             <input type="password" id="loginPassword" placeholder="Password">
             <p class="forgot" onclick="forgotPassword()">Forgot Password?</p>
             <button onclick="login()">Login</button>
-            <p class="switch">Don't have an account? <span onclick="showSignup()">Sign Up</span></p>
-        </div>
-
-        <!-- SIGNUP BOX -->
-        <div class="login-box" id="signupBox" style="display:none;">
-            <h2>Create Account</h2>
-            <input type="text" id="signupName" placeholder="Full Name">
-            <input type="email" id="signupEmail" placeholder="Email">
-            <input type="password" id="signupPassword" placeholder="Password">
-            <button onclick="createAccount()">Create Account</button>
-            <p class="switch">Already have an account? <span onclick="showLogin()">Login</span></p>
+            <p class="switch">Don't have an account? <span onclick="window.location.href='register.html'">Sign Up</span></p>
         </div>
 
     </section>
 
     <script>
-        /* ===== Show/Hide Boxes ===== */
-        function showSignup() {
-            document.getElementById("loginBox").style.display = "none";
-            document.getElementById("signupBox").style.display = "block";
-        }
-        function showLogin() {
-            document.getElementById("signupBox").style.display = "none";
-            document.getElementById("loginBox").style.display = "block";
-        }
+        // Universal Connection Fix
+        const host = window.location.hostname || '127.0.0.1';
+        const api_base = `http://${host}:3000`;
 
         /* ===== Backend Login API ===== */
         function login() {
@@ -119,7 +103,7 @@
                 return;
             }
 
-            fetch('http://localhost:3000/api/login', {
+            fetch(`${api_base}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -146,7 +130,7 @@
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
 
-            fetch('http://localhost:3000/api/signup', { // API route ready in backend
+            fetch(`${api_base}/api/signup`, { // API route ready in backend
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
@@ -167,7 +151,7 @@
         function forgotPassword() {
             const email = prompt("Enter your email for reset link:");
             if (email) {
-                fetch('http://localhost:3000/api/forgot-password', { // URL must match backend
+                fetch(`${api_base}/api/forgot-password`, { // URL must match backend
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })

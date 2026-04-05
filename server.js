@@ -218,6 +218,12 @@ app.get("/api/customer-insights", async (req, res) => {
         orders = [{ id: 1, user_id: "user1", product_name: "T-Shirt", price: 499, status: "Pending", date: new Date(), mode: "online" }];
     }
 
+    let users = await User.find();
+    let userMap = {};
+    users.forEach(u => {
+        userMap[u.user_id] = u.name || "Unknown User";
+    });
+
     let customerOrders = {};
     let customerSpending = {};
     let newCustomers = new Set();
@@ -238,7 +244,12 @@ app.get("/api/customer-insights", async (req, res) => {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
 
-    let topNames = topCustomers.map(c => c[0]);
+    let topNames = topCustomers.map(c => {
+        if (userMap[c[0]]) return userMap[c[0]];
+        if (c[0] === 'user123') return 'Admin User';
+        if (c[0] === 'user1') return 'Guest User';
+        return 'Unknown Customer';
+    });
     let topValues = topCustomers.map(c => c[1]);
 
     let spendingRange = [0, 0, 0];

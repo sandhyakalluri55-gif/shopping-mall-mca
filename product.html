@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Categories</title>
     <style>
         body {
@@ -130,6 +131,58 @@
             content: "✅ ";
             font-size: 24px;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 80%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-content img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .modal-content h3 { margin: 15px 0 10px; color: #0f172a; }
+        .modal-content .price { font-size: 22px; margin-bottom: 20px; color: #22c55e; font-weight: bold; }
+        .modal-content button.add-cart-btn {
+            background: linear-gradient(to right, #f59e0b, #d97706);
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .modal-content button.add-cart-btn:hover { background: linear-gradient(to right, #d97706, #b45309); transform: scale(1.05); }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
     </style>
 </head>
 
@@ -141,6 +194,7 @@
 
     <button onclick="goBack()" class="back-btn">⬅ Back</button>
     <button onclick="viewOrders()" class="back-btn">📦 My Orders</button>
+    <button onclick="window.location.href='cart.html'" class="back-btn" style="background: #f59e0b;">🛒 View Cart</button>
 
     <div class="filters">
         <button onclick="filterProducts('all')">All</button>
@@ -151,6 +205,17 @@
     <div class="grid" id="productGrid"></div>
 
     <div id="popup" class="popup">Order Placed Successfully ✅</div>
+
+    <!-- ADD TO CART MODAL -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <img id="modalImg" src="">
+            <h3 id="modalName"></h3>
+            <div id="modalPrice" class="price"></div>
+            <button class="add-cart-btn" onclick="addToCart()">Add to Cart</button>
+        </div>
+    </div>
 
     <script>
         // ✅ PRICE FIX (NUMBER FORMAT)
@@ -178,11 +243,14 @@
 
                 // ✅ PRICE PASS FIX
                 card.innerHTML = `
-                    <img src="${product.image}" onclick="orderNow('${product.name}', '${product.image}', ${product.price})">
+                    <img src="${product.image}" onclick="showAddToCart('${product.name}', '${product.image}', ${product.price})">
                     <h3>${product.name}</h3>
                     <div class="rating">${product.rating}</div>
                     <div class="price">₹${product.price}</div>
-                    <button onclick="orderNow('${product.name}', '${product.image}', ${product.price})">Buy Now</button>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="orderNow('${product.name}', '${product.image}', ${product.price})">Buy Now</button>
+                        <button onclick="showAddToCart('${product.name}', '${product.image}', ${product.price})" style="background: linear-gradient(to right, #f59e0b, #d97706);">Add to Cart</button>
+                    </div>
                 `;
                 productGrid.appendChild(card);
             });
@@ -200,7 +268,6 @@
 
         // ✅ UPDATED FUNCTION
         function orderNow(productName, productImage, price) {
-
             const user_id = localStorage.getItem("user_id");
 
             if (!user_id) {
@@ -209,36 +276,12 @@
                 return;
             }
 
-            fetch("http://127.0.0.1:3000/api/buy", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user_id: user_id,
-                    user_name: localStorage.getItem("user_name") || "Customer",
-                    product_name: productName,
-                    product_image: productImage,
-                    price: price,
-                    status: "Pending",
-                    mode: "online"
-                })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const popup = document.getElementById("popup");
-                        // User requirement: Exact string "Order Placed Successfully ✅"
-                        // Note: CSS already adds ✅ in before pseudo-element, but requirement asks for exact text.
-                        popup.textContent = "Order Placed Successfully ✅";
-                        popup.style.display = "block";
-                        setTimeout(() => popup.style.display = "none", 3000);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Error placing order");
-                });
+            // For "Buy Now", we clear the cart and add ONLY this product
+            let cart = [{ name: productName, image: productImage, price: parseInt(price) }];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Redirect directly to address page
+            window.location.href = 'address.html';
         }
 
         function filterProducts(category) {
@@ -250,6 +293,30 @@
                     card.style.display = "none";
                 }
             });
+        }
+
+        // Add to Cart Modal Logic
+        let selectedProduct = null;
+        function showAddToCart(name, image, price) {
+            selectedProduct = { name, image, price };
+            document.getElementById('modalImg').src = image;
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalPrice').innerText = '₹' + price;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+        function addToCart() {
+            if (!localStorage.getItem("user_id")) {
+                alert("Login first ❌");
+                window.location.href = "login.html";
+                return;
+            }
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push(selectedProduct);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            window.location.href = 'cart.html';
         }
     </script>
 

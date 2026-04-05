@@ -204,6 +204,10 @@
   </div>
 
   <script>
+    // Universal Connection Fix
+    const host = window.location.hostname || "127.0.0.1";
+    const api_base = `http://${host}:3000`;
+
     let productChart, revenueChart, trendChart, statusChart;
 
     function goBack() {
@@ -216,7 +220,7 @@
 
     async function loadDashboard() {
       try {
-        const res = await fetch("http://localhost:3000/api/dashboard-metrics");
+        const res = await fetch(`${api_base}/api/dashboard-metrics`);
         const data = await res.json();
 
         console.log("Dashboard Data:", data);
@@ -241,8 +245,17 @@
             datasets: [{
               label: "Orders",
               data: data.productCounts.length > 0 ? data.productCounts : [0],
-              backgroundColor: "#4F46E5",
-              borderColor: "#4338CA",
+              backgroundColor: [
+                "#facc15",  // Pending → Yellow
+                "#22c55e",  // Delivered → Green
+                "#ef4444"   // Cancelled → Red
+              ],
+              borderColor: [
+                "#eab308",
+                "#16a34a",
+                "#dc2626"
+              ],
+
               borderWidth: 1
             }]
           },
@@ -333,19 +346,24 @@
         const topProduct = data.productNames[0] || "N/A";
 
         document.getElementById("insightText").innerHTML = `
-          <div class="insight-item">
-            <strong>💡 Top Selling Product:</strong> ${topProduct}
-          </div>
-          <div class="insight-item">
-            <strong>💰 Average Order Value:</strong> ₹${avgOrderValue}
-          </div>
-          <div class="insight-item">
-            <strong>📦 Order Fulfillment Rate:</strong> ${((data.deliveredOrders / data.totalOrders * 100) || 0).toFixed(1)}%
-          </div>
-          <div class="insight-item">
-            <strong>⏳ Pending Orders:</strong> ${data.pendingOrders} orders waiting to be processed
-          </div>
-        `;
+  <div class="insight-item">
+    <strong>💡 Top Selling Product:</strong> ${topProduct} → So, increase stock and promote this product using ads
+  </div>
+
+  <div class="insight-item">
+    <strong>💰 Average Order Value:</strong> ₹${avgOrderValue} → To improve this, introduce combo offers and discounts
+  </div>
+
+  <div class="insight-item">
+    <strong>📦 Order Fulfillment Rate:</strong> ${((data.deliveredOrders / data.totalOrders * 100) || 0).toFixed(1)}% 
+    → So, improve delivery speed to increase customer satisfaction
+  </div>
+
+  <div class="insight-item">
+    <strong>⏳ Pending Orders:</strong> ${data.pendingOrders} orders 
+    → So, process pending orders faster to avoid delays
+  </div>
+`;
 
       } catch (error) {
         console.error("Error loading dashboard:", error);

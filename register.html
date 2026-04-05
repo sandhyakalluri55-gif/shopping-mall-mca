@@ -87,59 +87,63 @@
     </div>
 
     <script>
-    function register() {
-        let name = document.getElementById("name").value;
-        let email = document.getElementById("email").value;
-        let password = document.getElementById("password").value;
-        let confirm = document.getElementById("confirm").value;
-        let age = document.getElementById("age").value;
-        let gender = document.getElementById("gender").value;
+        // Universal Connection Fix
+        const host = window.location.hostname || "127.0.0.1";
+        const api_base = `http://${host}:3000`;
 
-        if (!name || !email || !password || !confirm || !age) {
-            alert("Fill necessary fields ❌");
-            return;
-        }
+        function register() {
+            let name = document.getElementById("name").value;
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let confirm = document.getElementById("confirm").value;
+            let age = document.getElementById("age").value;
+            let gender = document.getElementById("gender").value;
 
-        if (password !== confirm) {
-            alert("Passwords do not match ❌");
-            return;
-        }
-
-        fetch("http://localhost:3000/api/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                password: password,
-                age: Number(age),
-                gender: gender
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                localStorage.setItem("user_id", data.user_id);
-                localStorage.setItem("user_name", name);
-                alert("Registered Successfully ✅");
-                window.location.href = "login.html";
-            } else if (data.isExisting) {
-                // Auto-login and redirect
-                localStorage.setItem("user_id", data.user_id);
-                localStorage.setItem("user_name", name);
-                alert("Email already registered. Auto-logging in and redirecting...");
-                window.location.href = "login.html";
-            } else {
-                alert("Error: " + data.message);
+            if (!name || !email || !password || !confirm || !age) {
+                alert("Fill necessary fields ❌");
+                return;
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("API connection failed! Ensure node server.js is running.");
-        });
-    }
+
+            if (password !== confirm) {
+                alert("Passwords do not match ❌");
+                return;
+            }
+
+            fetch(`${api_base}/api/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                    age: Number(age),
+                    gender: gender
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem("user_id", data.user_id);
+                        localStorage.setItem("user_name", name);
+                        alert("Registered Successfully ✅");
+                        window.location.href = "login.html";
+                    } else if (data.isExisting) {
+                        // Auto-login and redirect
+                        localStorage.setItem("user_id", data.user_id);
+                        localStorage.setItem("user_name", name);
+                        alert("Email already registered. Auto-logging in and redirecting...");
+                        window.location.href = "login.html";
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("API connection failed! Ensure node server.js is running.");
+                });
+        }
     </script>
 
 </body>

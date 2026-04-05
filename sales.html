@@ -196,6 +196,10 @@
     </div>
 
     <script>
+        // Universal Connection Fix
+        const host = window.location.hostname || "127.0.0.1";
+        const api_base = `http://${host}:3000`;
+
         let revenueChart, channelChart, productChart, trendChart;
 
         function goBack() {
@@ -204,7 +208,7 @@
 
         async function loadDashboard() {
             try {
-                const res = await fetch("http://localhost:3000/api/sales-metrics");
+                const res = await fetch(`${api_base}/api/sales-metrics`);
                 const data = await res.json();
 
                 console.log("Sales Metrics:", data);
@@ -318,17 +322,34 @@
 
                 // Generate Insights
                 const avgOrderValue = (data.totalRevenue / (data.totalOrders || 1)).toFixed(0);
+
                 const topChannel = data.channelValues[0] > data.channelValues[1] ? "Online" : "Offline";
-                const topPercent = ((data.channelValues[0] / data.totalRevenue) * 100).toFixed(1);
+                const lowChannel = topChannel === "Online" ? "Offline" : "Online";
+
+                const topProduct = data.productLabels[0] || "N/A";
+
+                const topPercent = ((Math.max(...data.channelValues) / data.totalRevenue) * 100).toFixed(1);
 
                 document.getElementById("insightList").innerHTML = `
-            <li>💡 <strong>Best Performing Channel:</strong> ${topChannel} (${topPercent}% of revenue)</li>
-            <li>🏆 <strong>Top Selling Product:</strong> ${data.productLabels[0] || "N/A"} with highest revenue</li>
-            <li>📊 <strong>Average Order Value:</strong> ₹${avgOrderValue}</li>
-            <li>📈 <strong>Total Revenue:</strong> ₹${data.totalRevenue.toLocaleString()}</li>
-            <li>🎯 <strong>Performance Tip:</strong> Focus on promoting ${data.productLabels[0] || "top products"} to increase revenue</li>
-        `;
 
+<li>💡 <strong>Best Performing Channel:</strong> ${topChannel} (${topPercent}% revenue)
+→ So, increase marketing budget on ${topChannel} channel and scale campaigns</li>
+
+<li>⚠ <strong>Low Performing Channel:</strong> ${lowChannel}
+→ So, improve ${lowChannel} sales using discounts, ads, and customer engagement</li>
+
+<li>🏆 <strong>Top Selling Product:</strong> ${topProduct}
+→ So, boost this product using ads, homepage highlight, and combo offers</li>
+
+<li>📊 <strong>Average Order Value:</strong> ₹${avgOrderValue}
+→ ${avgOrderValue < 500
+                        ? "⚠ Low AOV → Introduce bundle offers and upselling strategies"
+                        : "✅ Good AOV → Maintain pricing and upselling strategies"}</li>
+
+<li>📈 <strong>Total Revenue:</strong> ₹${data.totalRevenue.toLocaleString()}
+→ So, increase revenue by focusing on high-performing products and repeat customers</li>
+
+`;
             } catch (error) {
                 console.error("Error loading sales metrics:", error);
                 document.getElementById("insightList").innerHTML = "<li style='color: red;'>Error loading data. Please try again later.</li>";

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Options</title>
+    <style>
+        body { font-family: Arial; margin: 0; background: #f8fafc; }
+        .header { background: #0f172a; color: white; text-align: center; padding: 15px; }
+        .container { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #0f172a; margin-bottom: 20px; }
+        .payment-option { display: flex; align-items: center; padding: 15px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .payment-option:hover { background: #f1f5f9; }
+        .payment-option input { margin-right: 15px; transform: scale(1.2); }
+        .payment-option label { font-size: 18px; cursor: pointer; width: 100%; }
+        .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; border: none; background: #22c55e; color: white; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #16a34a; transform: translateY(-2px); }
+        .back-btn { background: #64748b; margin-top: 10px; }
+        .back-btn:hover { background: #475569; }
+
+        /* SUCCESS POPUP STYLE */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .popup::before {
+            content: "✅ ";
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payment</h1>
+    </div>
+    <div class="container">
+        <h2>Select Payment Method</h2>
+        
+        <div class="payment-option">
+            <input type="radio" name="payment" id="upi" value="UPI" checked>
+            <label for="upi">UPI (GPay, PhonePe)</label>
+        </div>
+        <div class="payment-option">
+            <input type="radio" name="payment" id="card" value="Credit/Debit Card">
+            <label for="card">Credit / Debit Card</label>
+        </div>
+        <div class="payment-option">
+            <input type="radio" name="payment" id="cod" value="Cash on Delivery">
+            <label for="cod">Cash on Delivery (COD)</label>
+        </div>
+
+        <button class="btn" onclick="placeOrder()">Place Order</button>
+        <button class="btn back-btn" onclick="window.location.href='address.html'">Back to Address</button>
+    </div>
+
+    <!-- SUCCESS POPUP -->
+    <div id="popup" class="popup">Order Placed Successfully ✅</div>
+
+    <script>
+        // Universal Connection Fix
+        const host = window.location.hostname || "127.0.0.1";
+        const api_base = `http://${host}:3000`;
+
+        async function placeOrder() {
+            const user_id = localStorage.getItem("user_id");
+            if (!user_id) {
+                alert("Login required!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cartData.length === 0) {
+                alert("Cart is empty!");
+                window.location.href = "product.html";
+                return;
+            }
+
+            const user_name = localStorage.getItem("user_name") || "Customer";
+            
+            // Get selected payment mode
+            const paymentOptions = document.getElementsByName('payment');
+            let selectedMode = "online";
+            for (let option of paymentOptions) {
+                if (option.checked && option.value === "Cash on Delivery") {
+                    selectedMode = "offline";
+                }
+            }
+
+            const orderPromises = cartData.map(product => {
+                return fetch(`${api_base}/api/buy`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        user_name: user_name,
+                        product_name: product.name,
+                        product_image: product.image,
+                        price: product.price,
+                        status: "Pending",
+                        mode: selectedMode
+                    })
+                }).then(res => res.json());
+            });
+
+            try {
+                const results = await Promise.all(orderPromises);
+                const allSuccessful = results.every(res => res.success);
+                
+                if (allSuccessful) {
+                    // Show custom popup instead of alert
+                    const popup = document.getElementById('popup');
+                    popup.style.display = 'block';
+                    
+                    localStorage.removeItem('cart'); // Clear cart after order
+                    
+                    // Delay redirect slightly for the user to see the success message
+                    setTimeout(() => {
+                        window.location.href = "order.html"; // Go to orders page
+                    }, 2500); 
+
+                } else {
+                    alert("Some orders could not be placed. Please check your internet connection.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error placing order. Please try again.");
+            }
+        }
+    </script>
+</body>
+</html>

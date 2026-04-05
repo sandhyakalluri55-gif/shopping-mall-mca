@@ -189,6 +189,10 @@
     </div>
 
     <script>
+        // Universal Connection Fix
+        const host = window.location.hostname || "127.0.0.1";
+        const api_base = `http://${host}:3000`;
+
         let topChart, newReturningChart, spendingChart, ordersChart;
 
         function goBack() {
@@ -197,7 +201,7 @@
 
         async function loadDashboard() {
             try {
-                const res = await fetch("http://localhost:3000/api/customer-insights");
+                const res = await fetch(`${api_base}/api/customer-insights`);
                 const data = await res.json();
 
                 console.log("Customer Insights Data:", data);
@@ -300,23 +304,36 @@
                 const topCustomer = data.topNames[0] || "N/A";
                 const conversionRate = ((data.returningCustomers / data.totalCustomers * 100) || 0).toFixed(1);
 
-                document.getElementById("insightText").innerHTML = `
-            <div class="insight-item">
-                <strong>🥇 Top Customer:</strong> ${topCustomer} with ${data.topValues[0] || 0} purchases
-            </div>
-            <div class="insight-item">
-                <strong>📈 Customer Retention Rate:</strong> ${conversionRate}% (${data.returningCustomers} returning customers)
-            </div>
-            <div class="insight-item">
-                <strong>💡 Premium Customers:</strong> ${data.spendingRange[2]} customers spending above ₹2000
-            </div>
-            <div class="insight-item">
-                <strong>🎯 High-Value Segment:</strong> Focus on ${data.spendingRange[1]} medium-spending customers for upsell opportunities
-            </div>
-            <div class="insight-item">
-                <strong>💰 Total Revenue from Customers:</strong> ₹${(data.averageOrderValue * data.totalCustomers).toFixed(0)}
-            </div>
-        `;
+               document.getElementById("insightText").innerHTML = `
+
+  <div class="insight-item">
+    <strong>🥇 Top Customer:</strong> ${topCustomer} with ${data.topValues[0] || 0} purchases 
+    → So, reward this customer with loyalty offers and exclusive discounts
+  </div>
+
+  <div class="insight-item">
+    <strong>📈 Customer Retention Rate:</strong> ${conversionRate}% 
+    → ${conversionRate < 50 
+        ? "⚠ Low retention → So, improve engagement using offers, emails, and notifications" 
+        : "✅ Good retention → Maintain customer satisfaction strategies"}
+  </div>
+
+  <div class="insight-item">
+    <strong>💡 Premium Customers:</strong> ${data.spendingRange[2]} customers 
+    → So, target them with premium products and personalized recommendations
+  </div>
+
+  <div class="insight-item">
+    <strong>🎯 Medium-Spending Customers:</strong> ${data.spendingRange[1]} customers 
+    → So, convert them to high-value customers using combo offers and upselling
+  </div>
+
+  <div class="insight-item">
+    <strong>💰 Total Revenue:</strong> ₹${(data.averageOrderValue * data.totalCustomers).toFixed(0)} 
+    → So, increase revenue by improving average order value and targeting high spenders
+  </div>
+
+`;
 
             } catch (error) {
                 console.error("Error loading dashboard:", error);
